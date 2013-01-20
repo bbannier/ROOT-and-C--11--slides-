@@ -1,0 +1,31 @@
+% Workshop slides
+% Benjamin Bannier
+%
+
+COMMENTS
+========
+
+Topics
+------
+
+* lambdas, where they already work and where they would be nice
+* pointer ownership with std types
+* rvalue references and doubled memory comsumption when saving
+  to file
+* simple threading example with e.g. `async` or `thread`
+
+<!-- -->
+
+___
+
+    // TEST FOR CODE FORMATTING
+    #include <iostream>
+
+    template <typename T>
+    struct C { };
+
+    int main() {
+      const int zero = 0-0;
+      std::cout << "Hello, world!\n";
+    }
+
