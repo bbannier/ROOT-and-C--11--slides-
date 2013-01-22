@@ -21,6 +21,30 @@ Topics
 // TEST FOR CODE FORMATTING
 ~~~
 
+---
+
+~~~ {include="code/promise.cpp" .cpp}
+// example for std::promise
+~~~
+
+---
+
+~~~ {include="code/test.cpp" .cpp}
+// example for std::promise
+~~~
+
+---
+
+~~~ {include="code/virt.cpp" .cpp}
+// example for std::promise
+~~~
+
+---
+
+~~~ {include="code/bla.cpp" .cpp}
+// example for std::promise
+~~~
+
 SLIDES
 ======
 

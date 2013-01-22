@@ -4,10 +4,6 @@ CXXFLAGS = $(shell root-config --cflags) --std=c++11 -Wall
 LDFLAGS  = $(shell root-config --libs)
 SHELL := bash
 
-#SRC = test.cpp promise.cpp
-SRC = $(wildcard *.cpp)
-BIN = $(SRC:.cpp=)
-
 slides.pdf: slides.pdci
 	pandoc -o slides.pdf $< \
 	  -V graphics \
@@ -22,11 +18,6 @@ slides.pdci: slides.pdc
 test_samples: slides.pdc
 	@(for f in `grep '\{include' $^ | cut -d'"' -f2`; do \
 	  cat $$f > sample.cpp; \
-	  make sample; \
+	  make -B sample; \
 	  ./sample; \
 	  done)
-
-all: slides.pdc $(BIN)
-
-check: $(BIN)
-	@(for b in $(BIN); do ./$$b; done)
