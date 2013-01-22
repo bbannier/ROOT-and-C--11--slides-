@@ -1,6 +1,6 @@
 CXX = clang++
 CXX = g++-4.7.2
-CXXFLAGS = $(shell root-config --cflags) --std=c++11 -Wall -Werror
+CXXFLAGS = $(shell root-config --cflags) --std=c++11 -Wall -Werror -include code/decls.h
 LDFLAGS  = $(shell root-config --libs)
 SHELL := bash
 
@@ -18,9 +18,8 @@ slides.pdci: slides.pdc get_code
 check: slides.pdc
 	@(set -e; \
 	  for f in `grep '\{include' $^ | cut -d'"' -f2 | grep cpp$$`; do \
-	  cat code/decls.h > sample.cpp; \
-	  cat $$f >> sample.cpp; \
-	  make -B sample.o; \
+	  newname=`dirname $$f`/`basename $$f .cpp`.o; \
+	  make $$newname; \
 	  done)
 
 get_code: get_code.hs
