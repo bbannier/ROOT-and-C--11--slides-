@@ -1,12 +1,3 @@
-#include <algorithm>
-#include <TFile.h>
-#include <future>
-#include <vector>
-#include <map>
-#include <iostream>
-#include <TNtuple.h>
-#include <memory>
-
 struct FiledNtuple {
   std::unique_ptr<TFile> f = nullptr;
   std::unique_ptr<TNtuple> nt = nullptr;

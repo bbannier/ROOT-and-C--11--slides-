@@ -1,7 +1,3 @@
-#include <iostream>
-#include <future>
-#include <thread>
-
 int id(int i) { return i; }
 void set(int& i) { i=42; }
 

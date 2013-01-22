@@ -1,6 +1,6 @@
 CXX = clang++
 CXX = g++-4.7.2
-CXXFLAGS = $(shell root-config --cflags) --std=c++11 -Wall
+CXXFLAGS = $(shell root-config --cflags) --std=c++11 -Wall -Werror
 LDFLAGS  = $(shell root-config --libs)
 SHELL := bash
 
@@ -12,12 +12,16 @@ slides.pdf: slides.pdci
 	  --highlight-style=tango \
 	  --indented-code-class=Cpp,numberLines
 
-slides.pdci: slides.pdc
-	cat $^ | runhaskell get_code.hs > $@
+slides.pdci: slides.pdc get_code
+	cat $< | ./get_code > $@
 
-test_samples: slides.pdc
-	@(for f in `grep '\{include' $^ | cut -d'"' -f2`; do \
-	  cat $$f > sample.cpp; \
-	  make -B sample; \
-	  ./sample; \
+check: slides.pdc
+	@(set -e; \
+	  for f in `grep '\{include' $^ | cut -d'"' -f2 | grep cpp$$`; do \
+	  cat code/decls.h > sample.cpp; \
+	  cat $$f >> sample.cpp; \
+	  make -B sample.o; \
 	  done)
+
+get_code: get_code.hs
+	@ghc -O2 $@

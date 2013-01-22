@@ -1,6 +1,3 @@
-#include <vector>
-#include <memory>
-
 struct A { const int n = 1; };
 struct B { const int n = 2; };
 
@@ -30,11 +27,8 @@ class M : public wrapped<M> {
   const int n = 10;
 };
 
-#include <iostream>
-#include <typeinfo>
 int main() {
 #if 0
-  using namespace std;
   auto wa = wrap(new A);
   auto wb = wrap(new B);
   std::cout << typeid(wa.sp).name() << std::endl;
