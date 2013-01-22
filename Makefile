@@ -19,6 +19,13 @@ slides.pdf: slides.pdci
 slides.pdci: slides.pdc
 	cat $^ | runhaskell get_code.hs > $@
 
+test_samples: slides.pdc
+	@(for f in `grep '\{include' $^ | cut -d'"' -f2`; do \
+	  cat $$f > sample.cpp; \
+	  make sample; \
+	  ./sample; \
+	  done)
+
 all: slides.pdc $(BIN)
 
 check: $(BIN)
