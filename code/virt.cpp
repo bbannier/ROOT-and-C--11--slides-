@@ -11,15 +11,16 @@ template <typename T> struct wrapped {
 };
 
 // VIA TAG DISPATCH
-// this could be used as the return value for anything returning from some
-// storage. Breaks the current API.
+// this could be used as the return value for anything
+// returning from some storage. Breaks the current API.
 template <typename T> wrapped<T> wrap(T* a) {
   return wrapped<T>(a);
 }
 
 // via CRTP
-// Redefine all types to be wrapped. Doesn't require changing the API, but
-// breaks the ABI since it adds a base class, members and functions.
+// Redefine all types to be wrapped. Doesn't require
+// changing the API, but breaks the ABI since it adds a base
+// class, members and functions.
 class M : public wrapped<M> {
   friend wrapped<M>;
   M() : wrapped<M>(this) { }

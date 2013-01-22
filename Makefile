@@ -4,7 +4,7 @@ CXXFLAGS = $(shell root-config --cflags) --std=c++11 -Wall -Werror -include code
 LDFLAGS  = $(shell root-config --libs)
 SHELL := bash
 
-slides.pdf: slides.pdci
+slides.pdf: slides.pdci check
 	pandoc -o slides.pdf $< \
 	  -V graphics \
 	  -t beamer \
@@ -12,7 +12,7 @@ slides.pdf: slides.pdci
 	  --highlight-style=tango \
 	  --indented-code-class=Cpp,numberLines
 
-slides.pdci: slides.pdc get_code
+slides.pdci: slides.pdc get_code $(wildcard code/*.cpp)
 	cat $< | ./get_code > $@
 
 check: slides.pdc
