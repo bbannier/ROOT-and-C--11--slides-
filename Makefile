@@ -8,13 +8,18 @@ SHELL := bash
 SRC = $(wildcard *.cpp)
 BIN = $(SRC:.cpp=)
 
-all: slides.pdc $(BIN)
+slides.pdf: slides.pdci
 	pandoc -o slides.pdf $< \
 	  -V graphics \
 	  -t beamer \
 	  -H <(echo '\setbeamertemplate{navigation symbols}{}\setbeamertemplate{footline}[page number]') \
 	  --highlight-style=tango \
 	  --indented-code-class=Cpp,numberLines
+
+slides.pdci: slides.pdc
+	cat $^ | runhaskell get_code.hs > $@
+
+all: slides.pdc $(BIN)
 
 check: $(BIN)
 	@(for b in $(BIN); do ./$$b; done)

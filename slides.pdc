@@ -13,19 +13,29 @@ Topics
 * rvalue references and doubled memory comsumption when saving
   to file
 * simple threading example with e.g. `async` or `thread`
+* `std::bind`
 
-<!-- -->
+---
 
-___
+~~~ {include="code/test_formating.cpp" .cpp}
+// TEST FOR CODE FORMATTING
+~~~
 
-    // TEST FOR CODE FORMATTING
-    #include <iostream>
+SLIDES
+======
 
-    template <typename T>
-    struct C { };
+Who am I
+--------
 
-    int main() {
-      const int zero = 0-0;
-      std::cout << "Hello, world!\n";
-    }
+### About me.
 
+### Disclaimers
+
+Modern C++
+----------
+
+C++11
+-----
+
+PRACTICAL EXAMPLES
+==================
