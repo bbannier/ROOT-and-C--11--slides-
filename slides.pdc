@@ -131,23 +131,19 @@ Example applications
 
 > A container for heterogeneous data
 
-~~~~ {.cpp}
-tuple<double, int> tup(1.0, 42);
-// auto tup = make_tuple(1.0, 42);
+    tuple<double, int> tup(1.0, 42);
+    // auto tup = make_tuple(1.0, 42);
 
-auto& v1 = get<0>(tup);        // double& v1
-get<0>(tup) = 2.2;             // now tup = (2.2, 42)
+    auto& v1 = get<0>(tup);        // double& v1
+    get<0>(tup) = 2.2;             // now tup = (2.2, 42)
 
-tuple<int, int>    tup2 = tup; // tup2 = (2, 42)
-tuple<string, int> tup3 = tup; // won't compile
-~~~~
+    tuple<int, int>    tup2 = tup; // tup2 = (2, 42)
+    tuple<string, int> tup3 = tup; // won't compile
 
 This could allow a safe way to pass arguments to `TTree::Fill`:
 
-~~~~ {.cpp}
-template <typename ...Ts>
-Int_t TTree::Fill(const std::tuple<Ts...>& data);
-~~~~
+    template <typename ...Ts>
+    Int_t TTree::Fill(const std::tuple<Ts...>& data);
 
 
 Variadic templates: type-safe variadic functions
@@ -156,23 +152,19 @@ Variadic templates: type-safe variadic functions
 Support
 :   gcc-4.3/gcc-4.4, clang-2.9, icc-12.1, msvc-11.0
 
-~~~~ {.cpp}
-// TNtuple.h
-virtual Int_t Fill(Float_t x0, Float_t x1=0, Float_t x2=0, 
-                   Float_t x3=0, /* snip */
-                   Float_t x14=0);    // (1)
-virtual Int_t Fill(const Float_t *x); // (2)
-~~~~
+    // TNtuple.h
+    virtual Int_t Fill(Float_t x0, Float_t x1=0, Float_t x2=0, 
+                       Float_t x3=0, /* snip */
+                       Float_t x14=0);    // (1)
+    virtual Int_t Fill(const Float_t *x); // (2)
 
 `(1)` could be generalized:
 
-~~~~ {.cpp}
-template <typename ...Ts>
-virtual Int_t Fill(Ts... xs) {
-  array<Float_t, sizeof...(Ts)> data{{xs...}};
-  Fill(&data[0]);
-}
-~~~~
+    template <typename ...Ts>
+    virtual Int_t Fill(Ts... xs) {
+      array<Float_t, sizeof...(Ts)> data{{xs...}};
+      Fill(&data[0]);
+    }
 
 Due to type `array<Float_t, ...>` all `xs` are checked to be `Float_t` at compile time.
 
@@ -182,23 +174,19 @@ Make `(2)` accept an `array` or `vector`?
 
 ### How to get the first element?
 
-~~~~ {.cpp}
-template <typename T, typename ...Ts>
-T head(T x, Ts...) {
-  return x;
-}
-~~~~
+    template <typename T, typename ...Ts>
+    T head(T x, Ts...) {
+      return x;
+    }
 
 ### How to get the nth element?
 
 Simplest via a temporary
 
-~~~~ {.cpp}
-template <size_t n, typename ...Ts>
-auto get_nth(Ts... xs) -> decltype(get<n>(make_tuple(xs...))) {
-  return get<n>(make_tuple(xs...));
-}
-~~~~
+    template <size_t n, typename ...Ts>
+    auto get_nth(Ts... xs) -> decltype(get<n>(make_tuple(xs...))) {
+      return get<n>(make_tuple(xs...));
+    }
 
 If we worry about compiler implementation quality we could use a recursive
 template instead.
@@ -208,26 +196,21 @@ Initializer lists, uniform initialization
 
 > Consistent object construction
 
-~~~ {.cpp}
-TH1D h{"h", "", 100,0,10};
-int a[]{1, 2, 3};
-std::vector<int> v{1, 2, 3}
-~~~
+    TH1D h{"h", "", 100,0,10};
+    int a[]{1, 2, 3};
+    std::vector<int> v{1, 2, 3}
 
 Makes it so easy to create objects that they can be used much more widely:
 
-~~~ {.cpp}
-int f(const array<int, 3>& a) { return a[1]; }
-f({1, 2, 3}); // int(2)
+    int f(const array<int, 3>& a) { return a[1]; }
+    f({1, 2, 3}); // int(2)
 
-// why not e.g.
-TH3::TH3(const char* name, const char* title,
-         TAxis ax1, TAxis ax2, TAxis ax3);
-TH3D h3("h3", "", {100, 0, 10}, {10, 0, 10}, {300, 0, 20});
+    // why not e.g.
+    TH3::TH3(const char* name, const char* title,
+             TAxis ax1, TAxis ax2, TAxis ax3);
+    TH3D h3("h3", "", {100, 0, 10}, {10, 0, 10}, {300, 0, 20});
 
-// (even better with e.g. TAxis::TAxis(int, vector<double>))
-~~~
-
+    // (even better with e.g. TAxis::TAxis(int, vector<double>))
 
 
 Anonymous $\lambda$ functions and function objects
@@ -235,18 +218,16 @@ Anonymous $\lambda$ functions and function objects
 
 ### C++98
 
-~~~ {.cpp}
-// function pointers
-int sum2(int x, int y) { return x+y; }
-int (*sum2p)(int, int) = sum2;
-sum2p(1, 2); // int(3)
+    // function pointers
+    int sum2(int x, int y) { return x+y; }
+    int (*sum2p)(int, int) = sum2;
+    sum2p(1, 2); // int(3)
 
-// functor
-struct {
-  int operator()(int x, int y) { return x+y; }
-} sum1;
-sum1(1, 2);  // int(3)
-~~~
+    // functor
+    struct {
+      int operator()(int x, int y) { return x+y; }
+    } sum1;
+    sum1(1, 2);  // int(3)
 
 * need to refer to something defined non-locally
 * hard to store and pass polymorphically
@@ -255,16 +236,14 @@ sum1(1, 2);  // int(3)
 
 ### C++11
 
-~~~ {.cpp}
-auto sum1 = [](int x, int y) { return x+y; };
-function<int(int, int)> sum2 = sum1;
-int (*sum1p)(int, int) = sum1; 
-int (*sum2p)(int, int) = sum2; // doesn't work
+    auto sum1 = [](int x, int y) { return x+y; };
+    function<int(int, int)> sum2 = sum1;
+    int (*sum1p)(int, int) = sum1; 
+    int (*sum2p)(int, int) = sum2; // doesn't work
 
-// defined somewhere: int f(int, int) 
-auto lf = f;
-function<int(int, int)> ff = f;
-~~~
+    // defined somewhere: int f(int, int) 
+    auto lf = f;
+    function<int(int, int)> ff = f;
 
 * `function` and function pointers live in disconnected worlds.
 * polymorphic $\lambda$s [might be coming](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3418.pdf) soon
@@ -280,20 +259,18 @@ $\lambda$ functions
 
 #### What already works
 
-~~~ {.cpp}
-// TF1("f", "x"); // formula only checked at runtime
-TF1 f("f", [](double* xs, double* ps) { return xs[0]; });
+    // TF1("f", "x"); // formula only checked at runtime
+    TF1 f("f", [](double* xs, double* ps) { return xs[0]; });
 
-TH1 *m_meas;  // measured distribution
-TH1 *m0, *m1; // simulated distributions (say stat. err = 0)
-TF1 sum("sum", [m0, m1](double* ms, double* ps) {
-    double m = ms[0];
-    double y0 = m0->Interpolate(m);
-    double y1 = m1->Interpolate(m);
-    return y0*ps[0] + y1*ps[1];
-    }, 0, 10, 2);
-m_meas->Fit(&sum); // cannot use temporary here?
-~~~
+    TH1 *m_meas;  // measured distribution
+    TH1 *m0, *m1; // simulated distributions (say stat. err = 0)
+    TF1 sum("sum", [m0, m1](double* ms, double* ps) {
+        double m = ms[0];
+        double y0 = m0->Interpolate(m);
+        double y1 = m1->Interpolate(m);
+        return y0*ps[0] + y1*ps[1];
+        }, 0, 10, 2);
+    m_meas->Fit(&sum); // cannot use temporary here?
 
 With $\lambda$ functions much of `TFormula` is dangerous convenience functionality.
 
@@ -304,21 +281,19 @@ constraint types.
 
 #### A step further
 
-~~~ {.cpp}
-TNtuple t("t", "", "x:y");
-for (unsigned i=0; i<100000; ++i)
-  t.Fill(gRandom->Gaus(), gRandom->Gaus());
+    TNtuple t("t", "", "x:y");
+    for (unsigned i=0; i<100000; ++i)
+      t.Fill(gRandom->Gaus(), gRandom->Gaus());
 
-// t.Draw("x", "x>0");
+    // t.Draw("x", "x>0");
 
-// TNtuple
-t.Draw([](float* xs) { return xs[0]; },
-       [](float* xs) { return xs[0] > 0; });
+    // TNtuple
+    t.Draw([](float* xs) { return xs[0]; },
+           [](float* xs) { return xs[0] > 0; });
 
-// TTree
-t.Draw([](const tuple& xs) { return get<0>(xs); },
-       [](const tuple& xs) { return get<0>(xs) > 0; });
-~~~
+    // TTree
+    t.Draw([](const tuple& xs) { return get<0>(xs); },
+           [](const tuple& xs) { return get<0>(xs) > 0; });
 
 Some scaffolding could make this look nicer, but not as nice as PyROOT; e.g.
 use a `map` to provide clearer names.
@@ -329,16 +304,14 @@ Smart pointers
 Ownership issues are one of the biggest source of confusion and bugs in code
 against the ROOT API.
 
-~~~ {.cpp}
-// Who should manage the lifetime of a return value?
-Object* get(string name);
+    // Who should manage the lifetime of a return value?
+    Object* get(const string& name);
 
-// What are an object's dependencies?
-TFile f("f.root", "recreate");
-TH1* h = new TH1D("h", "", 100,0,1);
-f.Close();
-h->GetEntries();    // segfaults
-~~~
+    // What are an object's dependencies?
+    TFile f("f.root", "recreate");
+    TH1* h = new TH1D("h", "", 100,0,1);
+    f.Close();
+    h->GetEntries();    // segfaults
 
 Raw pointers do not help in answering any of these questions.
 
@@ -367,19 +340,15 @@ A compiler can check correct use.
 * * *
 
 #### One more look at the example
-~~~ {.cpp}
-TFile f("f.root", "recreate");
-TH1* h = new TH1D("h", "", 100,0,1);
-f.Close();
-h->GetEntries();    // segfaults
-~~~
+    TFile f("f.root", "recreate");
+    TH1* h = new TH1D("h", "", 100,0,1);
+    f.Close();
+    h->GetEntries();    // segfaults
 
 Who owns what here?\pause
 
-~~~ {.cpp}
-TList* TDirectory::fList;    // f holds pointer to h
-TDirectory* TH1::fDirectory; // h holds pointer to f
-~~~
+    TList* TDirectory::fList;    // f holds pointer to h
+    TDirectory* TH1::fDirectory; // h holds pointer to f
 
 We need to specify who should outlive the other.
 
@@ -388,18 +357,17 @@ Here `h` depends on `f`, but not the other way around.
 
 Just an idea:
 
-~~~ {.cpp}
-shared_ptr<TDirectory> gDirectory;
+    shared_ptr<TDirectory> gDirectory;
 
-// only allow TFile to be created with factory
-shared_ptr<TFile> TFile::Open(..) {
-  // ...  TFileOpenHandle *fh = 0;
-  return make_shared<TFile>(fh);
-}
+    // only allow TFile to be created with factory
+    shared_ptr<TFile> TFile::Open(..) {
+      // ...  TFileOpenHandle *fh = 0;
+      return make_shared<TFile>(fh);
+    }
 
-// h should have shared ownership of f
-shared_ptr<TDirectory> TH1::fDirectory
-~~~
+    // h should have shared ownership of f
+    shared_ptr<TDirectory> TH1::fDirectory
+
 \pause
 
 There are 1000s of similar issues in the ROOT codebase.
@@ -426,21 +394,20 @@ Concurrency
 
 * * *
 
-~~~ {.cpp}
-TH1* h = ... ;
-vector<TF1> fs = { ... };
+    TH1* h = ... ;
+    vector<TF1> fs = { ... };
 
-vector<future<TFitResultPtr>> fits;
+    vector<future<TFitResultPtr>> fits;
 
-for (auto& f : fs)
-  fits.push_back( async([&]() {
+    for (auto& f : fs)
+      fits.push_back( async([&]() {
 
-        return h->Fit(&f);
-        }) );
+            return h->Fit(&f);
+            }) );
 
-for (auto& fit : fits)
-  fit.get().Get()->Print();
-~~~
+    for (auto& fit : fits)
+      fit.get().Get()->Print();
+
 \pause
 
 `TH1::Fit` not `const` --- one shouldn't expect it to be thread-safe!  
@@ -450,21 +417,20 @@ for (auto& fit : fits)
 
 * * *
 
-~~~ {.cpp}
-TH1* h = ... ;
-vector<TF1> fs = { ... };
+    TH1* h = ... ;
+    vector<TF1> fs = { ... };
 
-vector<future<TFitResultPtr>> fits;
-mutex h_m;
-for (auto& f : fs)
-  fits.push_back( async([&]() {
-        lock_guard<mutex> lock(h_m); // yes, boring now
-        return h->Fit(&f);
-        }) );
+    vector<future<TFitResultPtr>> fits;
+    mutex h_m;
+    for (auto& f : fs)
+      fits.push_back( async([&]() {
+            lock_guard<mutex> lock(h_m); // yes, boring now
+            return h->Fit(&f);
+            }) );
 
-for (auto& fit : fits)
-  fit.get().Get()->Print();
-~~~
+    for (auto& fit : fits)
+      fit.get().Get()->Print();
+
 \pause
 
 * `TFitResultPtr::Get` and `TF1::Print` are `const` -- would expect this to work
@@ -498,46 +464,40 @@ Range-based `for` loops
 
 > Sugar-coated iteration
 
-~~~ {.cpp}
-ListT list;
-for (auto& element : list) { /* do something with element */ }
-~~~
+    ListT list;
+    for (auto& element : list) { /* do something with element */ }
 
 The interface `ListT` needs to provide
 
-~~~ {.Modula2}
-for (auto __begin = begin-expr, // begin(T) or T::begin()
-            __end = end-expr;   // end(T)   or T::end()
-     __begin != __end;          // iterator operator!=
-     ++__begin ) {              // iterator operator++
-  for-range-declaration = *__begin;
-  // statement
-}
-~~~
+    for (auto __begin = begin-expr, // begin(T) or T::begin()
+                __end = end-expr;   // end(T)   or T::end()
+         __begin != __end;          // iterator operator!=
+         ++__begin ) {              // iterator operator++
+      for-range-declaration = *__begin;
+      // statement
+    }
 
 * * *
 
-~~~ {.cpp}
-// only non-const version here
-struct TIteratorPtr {
-  TIterator* it = nullptr;
-  TIteratorPtr(TIterator* it) : it(it) { }
+    // only non-const version here
+    struct TIteratorPtr {
+      TIterator* it = nullptr;
+      TIteratorPtr(TIterator* it) : it(it) { }
 
-  TIteratorPtr& operator++() {
-    if (not it->Next()) it = nullptr;
-    return *this;
-  }
-  TObject* operator*() { return **it; }
-  bool operator!=(const TIteratorPtr& rhs) const {
-    return it != rhs.it;
-  }
-};
+      TIteratorPtr& operator++() {
+        if (not it->Next()) it = nullptr;
+        return *this;
+      }
+      TObject* operator*() { return **it; }
+      bool operator!=(const TIteratorPtr& rhs) const {
+        return it != rhs.it;
+      }
+    };
 
-TIteratorPtr begin(TCollection& c) {
-  return ++TIteratorPtr(c.MakeIterator());
-}
-TIteratorPtr end  (TCollection& c) { return nullptr; }
-~~~
+    TIteratorPtr begin(TCollection& c) {
+      return ++TIteratorPtr(c.MakeIterator());
+    }
+    TIteratorPtr end  (TCollection& c) { return nullptr; }
 
 Rvalue references
 -----------------
@@ -565,6 +525,12 @@ User-defined literals
 **TODO**
 
 * e.g. to define quantities with units
+* cannot work with C++98
+
+Enums
+-----
+**TODO**
+
 * cannot work with C++98
 
 <!--
