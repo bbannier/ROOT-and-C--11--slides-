@@ -193,7 +193,7 @@ Simplest via a temporary
 If we worry about compiler implementation quality we could use a recursive
 template instead.
 
-Initializer lists, uniform initialization
+Uniform initialization, initializer lists
 -----------------------------------------
 
 > Consistent object construction
@@ -357,7 +357,7 @@ We need to specify who should outlive the other.
 * * *
 Here `h` depends on `f`, but not the other way around.
 
-Just an idea:
+Just one idea:
 
     shared_ptr<TDirectory> gDirectory;
 
@@ -374,8 +374,8 @@ Just an idea:
 
 There are 1000s of similar issues in the ROOT codebase.
 
-Annotating pointer use policy would be a start so one could selectively "turn on"
-smart pointers in completely annotated sections.
+Annotating pointer use policy would be a start so one could selectively activate
+smart pointers in completely sections.
 
 Concurrency
 -----------
@@ -444,7 +444,7 @@ Concurrency
 
 * **always** make sure objects stay consistent
 * `const` methods are always thread-safe
-    -  use `mutable` members if internal synchronisation is needed
+    -  use `mutable` members with internal synchronisation (e.g. by locking) if needed
 * non-`const` methods might need synchronisation by user
 
 ##### Optimizations (for performance or maintenance)
