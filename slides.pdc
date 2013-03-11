@@ -462,10 +462,12 @@ Concurrency
 
 **Making a library thread-safe leads to a cleaner design.**
 
+<!--
 * * *
 
 \vspace{-.2em}
 \hfill\includegraphics[width=0.7\textwidth]{auto-soda-billy-mays-advertising-197253.jpeg}\hspace{-1.1cm}
+-->
 
 Range-based `for` loops
 -----------------------
@@ -507,6 +509,7 @@ The interface `ListT` needs to provide
     }
     TIteratorPtr end  (TCollection& c) { return nullptr; }
 
+<!--
 Rvalue references
 -----------------
 **TODO**
@@ -540,6 +543,7 @@ Enums
 **TODO**
 
 * cannot work with C++98
+-->
 
 
 Summary
