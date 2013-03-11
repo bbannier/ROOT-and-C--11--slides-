@@ -218,6 +218,47 @@ Makes it so easy to create objects that they can be used much more widely:
     // (even better with e.g. TAxis::TAxis(int, vector<double>))
 
 
+Range-based `for` loops
+-----------------------
+
+> Sugar-coated iteration
+
+    ListT list;
+    for (auto& element : list) { /* do something with element */ }
+
+The interface `ListT` needs to provide
+
+    for (auto __begin = begin-expr, // begin(T) or T::begin()
+                __end = end-expr;   // end(T)   or T::end()
+         __begin != __end;          // iterator operator!=
+         ++__begin ) {              // iterator operator++
+      for-range-declaration = *__begin;
+      // statement
+    }
+
+* * *
+
+    // only non-const version here
+    struct TIteratorPtr {
+      TIterator* it = nullptr;
+      TIteratorPtr(TIterator* it) : it(it) { }
+
+      TIteratorPtr& operator++() {
+        if (not it->Next()) it = nullptr;
+        return *this;
+      }
+      TObject* operator*() { return **it; }
+      bool operator!=(const TIteratorPtr& rhs) const {
+        return it != rhs.it;
+      }
+    };
+
+    TIteratorPtr begin(TCollection& c) {
+      return ++TIteratorPtr(c.MakeIterator());
+    }
+    TIteratorPtr end  (TCollection& c) { return nullptr; }
+
+
 Anonymous $\lambda$ functions and function objects
 --------------------------------------------------
 
@@ -469,45 +510,6 @@ Concurrency
 \hfill\includegraphics[width=0.7\textwidth]{auto-soda-billy-mays-advertising-197253.jpeg}\hspace{-1.1cm}
 -->
 
-Range-based `for` loops
------------------------
-
-> Sugar-coated iteration
-
-    ListT list;
-    for (auto& element : list) { /* do something with element */ }
-
-The interface `ListT` needs to provide
-
-    for (auto __begin = begin-expr, // begin(T) or T::begin()
-                __end = end-expr;   // end(T)   or T::end()
-         __begin != __end;          // iterator operator!=
-         ++__begin ) {              // iterator operator++
-      for-range-declaration = *__begin;
-      // statement
-    }
-
-* * *
-
-    // only non-const version here
-    struct TIteratorPtr {
-      TIterator* it = nullptr;
-      TIteratorPtr(TIterator* it) : it(it) { }
-
-      TIteratorPtr& operator++() {
-        if (not it->Next()) it = nullptr;
-        return *this;
-      }
-      TObject* operator*() { return **it; }
-      bool operator!=(const TIteratorPtr& rhs) const {
-        return it != rhs.it;
-      }
-    };
-
-    TIteratorPtr begin(TCollection& c) {
-      return ++TIteratorPtr(c.MakeIterator());
-    }
-    TIteratorPtr end  (TCollection& c) { return nullptr; }
 
 <!--
 Rvalue references
