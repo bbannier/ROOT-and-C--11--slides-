@@ -172,6 +172,7 @@ Due to type `array<Float_t, ...>` all `xs` are checked to be `Float_t` at compil
 
 Make `(2)` accept an `array` or `vector`?
 
+<!--
 * * *
 
 ### How to get the first element?
@@ -192,6 +193,8 @@ Simplest via a temporary
 
 If we worry about compiler implementation quality we could use a recursive
 template instead.
+-->
+
 
 Uniform initialization, initializer lists
 -----------------------------------------
@@ -239,12 +242,13 @@ Anonymous $\lambda$ functions and function objects
 ### C++11
 
     auto sum1 = [](int x, int y) { return x+y; };
+
     function<int(int, int)> sum2 = sum1;
-    int (*sum1p)(int, int) = sum1; 
+
+    int (*sum1p)(int, int) = sum1;
     int (*sum2p)(int, int) = sum2; // doesn't work
 
-    // defined somewhere: int f(int, int) 
-    auto lf = f;
+    // defined somewhere: int f(int, int)
     function<int(int, int)> ff = f;
 
 * `function` and function pointers live in disconnected worlds.
@@ -261,7 +265,7 @@ $\lambda$ functions
 
 #### What already works
 
-    // TF1("f", "x"); // formula only checked at runtime
+    // TF1 f("f", "x"); // formula only checked at runtime
     TF1 f("f", [](double* xs, double* ps) { return xs[0]; });
 
     TH1 *m_meas;  // measured distribution
@@ -303,11 +307,13 @@ use a `map` to provide clearer names.
 Smart pointers
 --------------
 
-Ownership issues are one of the biggest source of confusion and bugs in code
-using the ROOT API.
+Ownership issues are one of the big source of confusion and bugs in code using
+the ROOT API.
 
     // Who should manage the lifetime of a return value?
     Object* get(const string& name);
+
+    // what should happen to pointer members in class on copy?
 
     // What are an object's dependencies?
     TFile f("f.root", "recreate");
@@ -337,7 +343,7 @@ dependencies is hard.
 
 Smart pointers document and abstract the design away in types.
 
-A compiler can check correct use.
+A compiler can enfore correct use.
 
 * * *
 
@@ -357,7 +363,7 @@ We need to specify who should outlive the other.
 * * *
 Here `h` depends on `f`, but not the other way around.
 
-Just one idea:
+*Just one idea*:
 
     shared_ptr<TDirectory> gDirectory;
 
@@ -367,15 +373,15 @@ Just one idea:
       return std::shared_ptr<TFile>(fh->GetFile());
     }
 
-    // h can have shared ownership of f
+    // h could have shared ownership of f
     shared_ptr<TDirectory> TH1::fDirectory
 
 \pause
 
-There are 1000s of similar issues in the ROOT codebase.
+I think this is a part where the ROOT API is underspecified.
 
-Annotating pointer use policy would be a start so one could selectively activate
-smart pointers in completely sections.
+Annotating pointer use policy would be a start so one could selectively
+activate smart pointers in completed sections.
 
 Concurrency
 -----------
@@ -385,13 +391,14 @@ Concurrency
 * `pthreads` is a widely available multithreading C API
     - little type safety
     - doesn't integrate too nicely into C++ code
-* concurrent code is an expert topic
+* developing concurrent code is for experts
 
 #### C++11
 * high-level abstractions for
     - asynchronous code
     - multithreaded code
     - lock management
+    - ...
 * even beginners might use it
 
 * * *
@@ -450,8 +457,7 @@ Concurrency
 ##### Optimizations (for performance or maintenance)
 
 * avoid locking: minimize shared or global state
-* avoid locking: minimize shared or global state
-* avoid locking: minimize shared or global state
+* no seriously
 
 
 **Making a library thread-safe leads to a cleaner design.**
@@ -507,7 +513,7 @@ Rvalue references
 
 * language-level support to work efficiently with temporaries
 * mostly uninteresting for ROOT since it uses reference semantics anyway (a.k.a.
-      pointers everywhere)?
+      pointers everywhere) which are already extremely efficient
 
 * cannot work with C++98
 
@@ -534,6 +540,31 @@ Enums
 **TODO**
 
 * cannot work with C++98
+
+
+Summary
+-------
+
+* C++, compilers and standard library implementations have come a long way
+  since ROOT was started
+* type constraints are an extremely useful tool to catch usage errors early
+* compared to the 1990s C++ today can be much safer to use
+
+<!-- -->
+
+* C++11 adds a number of abstractions and tools to make C++ code more
+  expressive
+
+<!-- -->
+
+* the disconnect between the mainstream "C++ way" and the "ROOT way" will feel
+  more painful once C++11 features are used more
+* value semantics allow to leverage language support for automatically
+  generating code
+* cling is a great opportunity to provide at least for user-visible parts a
+  more mainstream C++ API
+
+
 
 <!--
 * <http://nealford.com/memeagora/2013/01/22/why_everyone_eventually_hates_maven.html>
