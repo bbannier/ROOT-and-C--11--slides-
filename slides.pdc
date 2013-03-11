@@ -277,14 +277,14 @@ $\lambda$ functions
 With $\lambda$ functions much of `TFormula` is dangerous convenience functionality.
 
 Anywhere a function pointer is used now one could use `function` objects to
-constraint types.
+constrain types.
 
 * * *
 
 #### A step further
 
     TNtuple t("t", "", "x:y");
-    for (unsigned i=0; i<100000; ++i)
+    for (int i=0; i<100000; ++i)
       t.Fill(gRandom->Gaus(), gRandom->Gaus());
 
     // t.Draw("x", "x>0");
@@ -304,7 +304,7 @@ Smart pointers
 --------------
 
 Ownership issues are one of the biggest source of confusion and bugs in code
-against the ROOT API.
+using the ROOT API.
 
     // Who should manage the lifetime of a return value?
     Object* get(const string& name);
@@ -364,10 +364,10 @@ Just one idea:
     // only allow TFile to be created with factory
     shared_ptr<TFile> TFile::Open(..) {
       // ...  TFileOpenHandle *fh = 0;
-      return make_shared<TFile>(fh);
+      return std::shared_ptr<TFile>(fh->GetFile());
     }
 
-    // h should have shared ownership of f
+    // h can have shared ownership of f
     shared_ptr<TDirectory> TH1::fDirectory
 
 \pause
