@@ -86,7 +86,7 @@ runtime.
 * started as a set of extensions on top of C
 * 1st edition of *The C++ Programming Language* in 1985
 * standardized in 1998, bug fix in 2003 (nothing new)
-* compiler support for all features relatively late
+* compilers with support for all features relatively late
 * this is all there is to C++ in ROOT
 
 \pause
@@ -123,77 +123,18 @@ runtime.
 * user-defined literals
 * \ldots
 
-Example applications
-====================
-
-`std::tuple` from TR1
----------------------
-
-> A container for heterogeneous data
-
-    tuple<double, int> tup(1.0, 42);
-    // auto tup = make_tuple(1.0, 42);
-
-    auto& v1 = get<0>(tup);        // double& v1
-    get<0>(tup) = 2.2;             // now tup = (2.2, 42)
-
-    tuple<int, int>    tup2 = tup; // tup2 = (2, 42)
-    tuple<string, int> tup3 = tup; // won't compile
-
-This could allow a safe way to pass arguments to `TTree::Fill`:
-
-    template <typename ...Ts>
-    Int_t TTree::Fill(const std::tuple<Ts...>& data);
-
-
-Variadic templates: type-safe variadic functions
-------------------------------------------------
-
-Support
-:   gcc-4.3/gcc-4.4, clang-2.9, icc-12.1, msvc-11.0
-
-<!-- -->
-
-    // TNtuple.h
-    virtual Int_t Fill(Float_t x0, Float_t x1=0, Float_t x2=0, 
-                       Float_t x3=0, /* snip */
-                       Float_t x14=0);    // (1)
-    virtual Int_t Fill(const Float_t *x); // (2)
-
-`(1)` could be generalized:
-
-    template <typename ...Ts>
-    virtual Int_t Fill(Ts... xs) {
-      array<Float_t, sizeof...(Ts)> data{{xs...}};
-      Fill(&data[0]);
-    }
-
-Due to type `array<Float_t, ...>` all `xs` are checked to be `Float_t` at compile time.
-
-Make `(2)` accept an `array` or `vector`?
-
-<!--
 * * *
 
-### How to get the first element?
+C++11 brought the language up-to-date with existing best practices:
 
-    template <typename T, typename ...Ts>
-    T head(T x, Ts...) {
-      return x;
-    }
+* leverage the type system: *compile-time errors are better than runtime errors*
+* safer, high-level abstractions with zero extra runtime cost
+* more compact: *code not written cannot introduce bugs*
+* as performant as low-level code (or better)
 
-### How to get the nth element?
 
-Simplest via a temporary
-
-    template <size_t n, typename ...Ts>
-    auto get_nth(Ts... xs) -> decltype(get<n>(make_tuple(xs...))) {
-      return get<n>(make_tuple(xs...));
-    }
-
-If we worry about compiler implementation quality we could use a recursive
-template instead.
--->
+Example applications
+====================
 
 
 Uniform initialization, initializer lists
@@ -205,7 +146,8 @@ Uniform initialization, initializer lists
     int a[]{1, 2, 3};
     std::vector<int> v{1, 2, 3}
 
-Makes it so easy to create objects that they can be used much more widely:
+Makes it so easy to create objects that they can be used much more widely. e.g.
+to create temporaries
 
     int f(const array<int, 3>& a) { return a[1]; }
     f({1, 2, 3}); // int(2)
@@ -215,7 +157,7 @@ Makes it so easy to create objects that they can be used much more widely:
              TAxis ax1, TAxis ax2, TAxis ax3);
     TH3D h3("h3", "", {100, 0, 10}, {10, 0, 10}, {300, 0, 20});
 
-    // (even better with e.g. TAxis::TAxis(int, vector<double>))
+    // (even better with e.g. TAxis::TAxis(vector<double>))
 
 
 Range-based `for` loops
@@ -283,14 +225,14 @@ Anonymous $\lambda$ functions and function objects
 ### C++11
 
     auto sum1 = [](int x, int y) { return x+y; };
+    int (*sum1p)(int, int) = sum1;
 
     function<int(int, int)> sum2 = sum1;
-
-    int (*sum1p)(int, int) = sum1;
     int (*sum2p)(int, int) = sum2; // doesn't work
 
     // defined somewhere: int f(int, int)
-    function<int(int, int)> ff = f;
+    function<   int(   int,    int)> fi = f;
+    function<double(double, double)> fd = f;
 
 * `function` and function pointers live in disconnected worlds.
 * polymorphic $\lambda$s [might be coming](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3418.pdf) soon
@@ -328,22 +270,39 @@ constrain types.
 
 #### A step further
 
-    TNtuple t("t", "", "x:y");
-    for (int i=0; i<100000; ++i)
-      t.Fill(gRandom->Gaus(), gRandom->Gaus());
+<!--
+TNtuple t("t", "", "x:y");
 
-    // t.Draw("x", "x>0");
+// t.Draw("x", "x>0");
 
-    // TNtuple
-    t.Draw([](float* xs) { return xs[0]; },
-           [](float* xs) { return xs[0] > 0; });
+// TNtuple
+t.Draw([](float* xs) { return { xs[0] }; },
+    [](float* xs) { return xs[0] > 0; });
 
-    // TTree
-    t.Draw([](const tuple& xs) { return get<0>(xs); },
-           [](const tuple& xs) { return get<0>(xs) > 0; });
+// TTree
+t.Draw([](const tuple& xs) { return { get<0>(xs) }; },
+    [](const tuple& xs) { return get<0>(xs) > 0; });
 
 Some scaffolding could make this look nicer, but not as nice as PyROOT; e.g.
 use a `map` to provide clearer names.
+
+* * *
+
+#### ~~not as nice as PyROOT~~ (look who was hiding for 2 years)
+-->
+
+
+    TNtuple t("t", "", "x:y");
+
+    // t.Draw("x", "x>0");
+
+    // TTree
+    TTreeReader tr(&t);
+    TTreeReaderValue<float> x(tr, "x");
+    TTreeReaderValue<float> y(tr, "y");
+    t.Draw([&x,&y]() { return {*x, *y} ); },
+           [&x]   () { return *x > 0; });
+
 
 Smart pointers
 --------------
@@ -388,18 +347,29 @@ A compiler can enfore correct use.
 
 * * *
 
-#### One more look at the example
+#### One more look at example (3)
     TFile f("f.root", "recreate");
     TH1* h = new TH1D("h", "", 100,0,1);
     f.Close();
     h->GetEntries();    // segfaults
 
-Who owns what here?\pause
+Who owns what here?
+
+\begin{figure}
+\includegraphics<1>[width=0.6\textwidth]{beating_a_dead_horse_by_potatoehuman}
+\end{figure}
+
+\pause
 
     TList* TDirectory::fList;    // f holds pointer to h
     TDirectory* TH1::fDirectory; // h holds pointer to f
 
 We need to specify who should outlive the other.
+
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
 
 * * *
 Here `h` depends on `f`, but not the other way around.
@@ -503,11 +473,78 @@ Concurrency
 
 **Making a library thread-safe leads to a cleaner design.**
 
-<!--
 * * *
 
 \vspace{-.2em}
 \hfill\includegraphics[width=0.7\textwidth]{auto-soda-billy-mays-advertising-197253.jpeg}\hspace{-1.1cm}
+
+`std::tuple` from TR1
+---------------------
+
+> A container for heterogeneous data
+
+    tuple<double, int> tup(1.0, 42);
+    // auto tup = make_tuple(1.0, 42);
+
+    auto& v1 = get<0>(tup);        // double& v1
+    get<0>(tup) = 2.2;             // now tup = (2.2, 42)
+
+    tuple<int, int>    tup2 = tup; // tup2 = (2, 42)
+    tuple<string, int> tup3 = tup; // won't compile
+
+This could allow a safe way to pass arguments to `TTree::Fill`:
+
+    template <typename ...Ts>
+    Int_t TTree::Fill(const std::tuple<Ts...>& data);
+
+
+Variadic templates: type-safe variadic functions
+------------------------------------------------
+
+Support
+:   gcc-4.3/gcc-4.4, clang-2.9, icc-12.1, msvc-11.0
+
+<!-- -->
+
+    // TNtuple.h
+    virtual Int_t Fill(Float_t x0, Float_t x1=0, Float_t x2=0, 
+                       Float_t x3=0, /* snip */
+                       Float_t x14=0);    // (1)
+    virtual Int_t Fill(const Float_t *x); // (2)
+
+`(1)` could be generalized:
+
+    template <typename ...Ts>
+    virtual Int_t Fill(Ts... xs) {
+      array<Float_t, sizeof...(Ts)> data{{xs...}};
+      Fill(&data[0]);
+    }
+
+Due to type `array<Float_t, ...>` all `xs` are checked to be `Float_t` at compile time.
+
+Make `(2)` accept an `array` or `vector`?
+
+<!--
+* * *
+
+### How to get the first element?
+
+    template <typename T, typename ...Ts>
+    T head(T x, Ts...) {
+      return x;
+    }
+
+### How to get the nth element?
+
+Simplest via a temporary
+
+    template <size_t n, typename ...Ts>
+    auto get_nth(Ts... xs) -> decltype(get<n>(make_tuple(xs...))) {
+      return get<n>(make_tuple(xs...));
+    }
+
+If we worry about compiler implementation quality we could use a recursive
+template instead.
 -->
 
 
