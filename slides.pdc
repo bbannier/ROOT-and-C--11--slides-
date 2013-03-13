@@ -137,69 +137,6 @@ Example applications
 ====================
 
 
-Uniform initialization, initializer lists
------------------------------------------
-
-> Consistent object construction
-
-    TH1D h{"h", "", 100,0,10};
-    int a[]{1, 2, 3};
-    std::vector<int> v{1, 2, 3}
-
-Makes it so easy to create objects that they can be used much more widely. e.g.
-to create temporaries
-
-    int f(const array<int, 3>& a) { return a[1]; }
-    f({1, 2, 3}); // int(2)
-
-    // why not e.g.
-    TH3::TH3(const char* name, const char* title,
-             TAxis ax1, TAxis ax2, TAxis ax3);
-    TH3D h3("h3", "", {100, 0, 10}, {10, 0, 10}, {300, 0, 20});
-
-    // (even better with e.g. TAxis::TAxis(vector<double>))
-
-
-Range-based `for` loops
------------------------
-
-> Sugar-coated iteration
-
-    ListT list;
-    for (auto& element : list) { /* do something with element */ }
-
-The interface `ListT` needs to provide
-
-    for (auto __begin = begin-expr, // begin(T) or T::begin()
-                __end = end-expr;   // end(T)   or T::end()
-         __begin != __end;          // iterator operator!=
-         ++__begin ) {              // iterator operator++
-      for-range-declaration = *__begin;
-      // statement
-    }
-
-* * *
-
-    // only non-const version here
-    struct TIteratorPtr {
-      TIterator* it = nullptr;
-      TIteratorPtr(TIterator* it) : it(it) { }
-
-      TIteratorPtr& operator++() {
-        if (not it->Next()) it = nullptr;
-        return *this;
-      }
-      TObject* operator*() { return **it; }
-      bool operator!=(const TIteratorPtr& rhs) const {
-        return it != rhs.it;
-      }
-    };
-
-    TIteratorPtr begin(TCollection& c) {
-      return ++TIteratorPtr(c.MakeIterator());
-    }
-    TIteratorPtr end  (TCollection& c) { return nullptr; }
-
 
 Anonymous $\lambda$ functions and function objects
 --------------------------------------------------
@@ -477,6 +414,71 @@ Concurrency
 
 \vspace{-.2em}
 \hfill\includegraphics[width=0.7\textwidth]{auto-soda-billy-mays-advertising-197253.jpeg}\hspace{-1.1cm}
+
+
+Uniform initialization, initializer lists
+-----------------------------------------
+
+> Consistent object construction
+
+    TH1D h{"h", "", 100,0,10};
+    int a[]{1, 2, 3};
+    std::vector<int> v{1, 2, 3}
+
+Makes it so easy to create objects that they can be used much more widely. e.g.
+to create temporaries
+
+    int f(const array<int, 3>& a) { return a[1]; }
+    f({1, 2, 3}); // int(2)
+
+    // why not e.g.
+    TH3::TH3(const char* name, const char* title,
+             TAxis ax1, TAxis ax2, TAxis ax3);
+    TH3D h3("h3", "", {100, 0, 10}, {10, 0, 10}, {300, 0, 20});
+
+    // (even better with e.g. TAxis::TAxis(vector<double>))
+
+
+Range-based `for` loops
+-----------------------
+
+> Sugar-coated iteration
+
+    ListT list;
+    for (auto& element : list) { /* do something with element */ }
+
+The interface `ListT` needs to provide
+
+    for (auto __begin = begin-expr, // begin(T) or T::begin()
+                __end = end-expr;   // end(T)   or T::end()
+         __begin != __end;          // iterator operator!=
+         ++__begin ) {              // iterator operator++
+      for-range-declaration = *__begin;
+      // statement
+    }
+
+* * *
+
+    // only non-const version here
+    struct TIteratorPtr {
+      TIterator* it = nullptr;
+      TIteratorPtr(TIterator* it) : it(it) { }
+
+      TIteratorPtr& operator++() {
+        if (not it->Next()) it = nullptr;
+        return *this;
+      }
+      TObject* operator*() { return **it; }
+      bool operator!=(const TIteratorPtr& rhs) const {
+        return it != rhs.it;
+      }
+    };
+
+    TIteratorPtr begin(TCollection& c) {
+      return ++TIteratorPtr(c.MakeIterator());
+    }
+    TIteratorPtr end  (TCollection& c) { return nullptr; }
+
 
 `std::tuple` from TR1
 ---------------------
