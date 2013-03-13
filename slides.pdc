@@ -361,7 +361,7 @@ Concurrency
     for (auto& f : fs)
       fits.push_back( async([&]() {
 
-            return h->Fit(&f);
+            return h->Fit(&f, "S");
             }) );
 
     for (auto& fit : fits)
