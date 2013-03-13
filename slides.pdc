@@ -132,6 +132,8 @@ C++11 brought the language up-to-date with existing best practices:
 * more compact: *code not written cannot introduce bugs*
 * as performant as low-level code (or better)
 
+C++11 allows to write beginner-friendly, safe and efficient code.
+
 
 Example applications
 ====================
